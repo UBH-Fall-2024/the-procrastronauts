@@ -48,7 +48,7 @@ function sendMessage(){
 
     let message = {
         "id":socket.id,
-        "loc":location,
+        "loc":self_location,
         "msg":cleanMessage(messageInput.value)
     };
 
