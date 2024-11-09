@@ -9,10 +9,8 @@ let messages = document.getElementById("messages");
 locateButton.onclick = () => {locate();}
 messageButton.onclick = () => {sendMessage();}
 
-let self_location = {
-    "lat":0.0,
-    "lon":0.0,
-}
+let longitude;
+let latitude;
 
 if("geolocation" in navigator){
     locate();
@@ -30,12 +28,8 @@ function locate(){
 }
 
 function locationSuccess(position){
-    let latitude = position.coords.latitude;
-    let longitude = position.coords.longitude;
-
-    self_location["lat"] = latitude;
-    self_location["lon"] = longitude;
-
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
     
     locationText.textContent = "Location: "+latitude.toString()+", "+longitude.toString();
 }
@@ -48,7 +42,8 @@ function sendMessage(){
 
     let message = {
         "id":socket.id,
-        "loc":self_location,
+        "lon": longitude,
+        "lat": latitude,
         "msg":cleanMessage(messageInput.value)
     };
 
