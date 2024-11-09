@@ -38,12 +38,68 @@ class node:
         return (self.x, self.y, self.z)
 
 class octree:
+    def __init__(self, x, y, z, radius):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.radius = radius
 
-    def __init__(self, tl, tr, bl, br):
+        self.split = False
+        self.n = None
+
+        self.py_px_mz = None
+        self.py_px_pz = None
+        self.py_mx_pz = None
+        self.py_mx_mz = None
+        
+        self.my_px_pz = None
+        self.my_px_mz = None
+        self.my_mx_pz = None
+        self.my_mx_mz = None
         pass
+
+    def inside(self, p):
+         return (self.x - self.radius <= p[0] <= self.x + self.radius and
+                 self.y - self.radius <= p[1] <= self.y + self.radius and
+                 self.z - self.radius <= p[2] <= self.z + self.radius)
 
     def insert(self, n):
-        pass
+        if not self.inside(n.get_pos()):
+            return
+        
+        if not self.split:
+            if self.n == None:
+                self.n = n
+                return
+            self.split()
+            self.insert(self.n)
+            self.n = None
+            self.insert(n)
+            return
+
+        self.py_px_pz.insert(n)
+        self.py_px_mz.insert(n)
+        self.py_mx_pz.insert(n)
+        self.py_mx_mz.insert(n)
+        
+        self.my_px_pz.insert(n)
+        self.my_px_mz.insert(n)
+        self.my_mx_pz.insert(n)
+        self.my_mx_mz.insert(n)
+
+    def split(self):
+        self.split = True
+        new_radius = self.radius / 2
+        offsets = [-new_radius, new_radius]
+
+        self.py_px_pz = octree(self.x + offsets[1], self.y + offsets[1], self.z + offsets[1], new_radius)
+        self.py_px_mz = octree(self.x + offsets[1], self.y + offsets[1], self.z + offsets[0], new_radius)
+        self.py_mx_pz = octree(self.x + offsets[0], self.y + offsets[1], self.z + offsets[1], new_radius)
+        self.py_mx_mz = octree(self.x + offsets[0], self.y + offsets[1], self.z + offsets[0], new_radius)
+        self.my_px_pz = octree(self.x + offsets[1], self.y + offsets[0], self.z + offsets[1], new_radius)
+        self.my_px_mz = octree(self.x + offsets[1], self.y + offsets[0], self.z + offsets[0], new_radius)
+        self.my_mx_pz = octree(self.x + offsets[0], self.y + offsets[0], self.z + offsets[1], new_radius)
+        self.my_mx_mz = octree(self.x + offsets[0], self.y + offsets[0], self.z + offsets[0], new_radius)
 
     def remove(self, n):
         pass

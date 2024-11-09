@@ -26,7 +26,7 @@ def find_targets(id):
     n = clients[id]
     targets = []
     for i, o in clients:
-        if haversine(n.get_pos(), o.get_pos()) < RANGE:
+        if haversine(n.get_coord(), o.get_coord()) < RANGE:
             targets.append(i)
     return targets
 
@@ -47,7 +47,7 @@ def message(content):
     data = json.loads(content)
     print(data)
     if data['id'] not in clients:
-        clients[data['id']] = node(data['id'], data['lon'], data['lat'])
+        clients[data['id']] = node(data['id'], data['let'], data['lon'])
     out = {}
     out['from'] = data['id']
     out['msg'] =  escape(data['msg'])
@@ -65,7 +65,7 @@ def client_update():
         for i, n in clients.items():
             try:
                 loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))}), timeout=120))
-                clients[i] = (loc['lon'], loc['lat'])
+                clients[i].update_location(loc['lat'], loc['lon'])
             except TimeoutError:
                 client_disconnect(i)
             
