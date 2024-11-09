@@ -3,9 +3,11 @@ const socket = io();
 let locationText = document.getElementById("location");
 let locateButton = document.getElementById("locateButton");
 let messageInput = document.getElementById("messageInput");
+let messageButton = document.getElementById("messageButton");
 let messages = document.getElementById("messages");
 
 locateButton.onclick = () => {locate();}
+messageButton.onclick = () => {sendMessage();}
 
 let self_location = {
     "lat":0.0,
@@ -51,6 +53,7 @@ function sendMessage(){
     };
 
     socket.emit("send",message);
+    console.log("hi");
     messageInput.value = "";
 }
 
