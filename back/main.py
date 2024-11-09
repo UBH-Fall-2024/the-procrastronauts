@@ -13,25 +13,26 @@ clients = {}
 def home():
     return render_template('index.html')
 
-@socketio.on('connect')
-def test_connect(auth):
-    print("socket connection")
+# @socketio.on('connect')
+# def test_connect(auth):
+#     print("socket connection")
 
-@socketio.on('disconnect')
-def test_disconnect():
-    print('Client disconnected')
+# @socketio.on('disconnect')
+# def test_disconnect():
+#     print('Client disconnected')
 
 @socketio.on('send')
 def message(content):
     data = json.loads(content)
+    print(data)
     if data['id'] not in clients:
-        clients[data.id] = (data['loc']['lon'], data['loc']['lat'])
+        clients[data['id']] = (data['lon'], data['lat'])
     out = {}
     out['from'] = data['id']
     out['msg'] =  escape(data['msg'])
     pl = json.dumps(out)
     for i, l in clients.items():
-        socketio.emit('recieve', pl)
+        socketio.emit('receive', pl)
 
 def client_disconnect(id):
     socketio.emit('disconnect', to=id)
@@ -41,7 +42,7 @@ def client_update():
     while True:
         for i, l in clients.items():
             try:
-                loc = json.loads(socketio.call('status', timeout=120))
+                loc = socketio.call('status', timeout=120)
                 clients[i] = (loc['lon'], loc['lat'])
             except TimeoutError:
                 client_disconnect(i)
@@ -49,5 +50,5 @@ def client_update():
         socketio.sleep(3)
 
 if __name__ == '__main__':
-    socketio.start_background_task(client_update)
+    # socketio.start_background_task(client_update)
     socketio.run(app)
