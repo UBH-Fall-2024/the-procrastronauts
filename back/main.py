@@ -64,7 +64,7 @@ def client_update():
     while True:
         for i, n in clients.items():
             try:
-                loc = json.loads(socketio.call('status', timeout=120))
+                loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))}), timeout=120))
                 clients[i] = (loc['lon'], loc['lat'])
             except TimeoutError:
                 client_disconnect(i)
