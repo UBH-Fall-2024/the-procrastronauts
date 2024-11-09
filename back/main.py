@@ -16,8 +16,6 @@ def home():
 @socketio.on('connect')
 def test_connect(auth):
     print("socket connection")
-    print(auth)
-    socketio.emit('my response', {'data': 'Connected'})
 
 @socketio.on('disconnect')
 def test_disconnect():
