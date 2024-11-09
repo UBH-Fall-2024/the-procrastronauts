@@ -24,22 +24,22 @@ class node:
         self.update_location(lat, lon)
         self.tree = None
     
-    def update_location(self, lat, lon):
+    def update_location(self, lat: float, lon: float):
         self.lat = lat
         self.lon = lon
         (x, y, z) = coord_to_real((self.lat, self.lon))
         self.x = x
         self.y = y
         self.z = z
-        
+
     def remove(self):
         self.tree.n = None
         self.tree = None
     
-    def get_coord(self):
+    def get_coord(self) -> tuple[float, float]:
         return (self.lat, self.lon)
     
-    def get_pos(self):
+    def get_pos(self) -> tuple[float, float, float]:
         return (self.x, self.y, self.z)
 
 class octree:
@@ -84,7 +84,7 @@ class octree:
                             (z - sphere_z) ** 2)
         return distance <= sphere_radius
     
-    def find(self, pos):
+    def find(self, pos: tuple[float, float, float]):
         if not self.split:
             if self.n != None:
                 if self.point_in_sphere(pos[0], pos[1], pos[2], RANGE):
@@ -103,7 +103,7 @@ class octree:
         out.append(self.my_mx_mz.find(pos))
         return out
 
-    def insert(self, n):
+    def insert(self, n: node):
         if not self.inside(n.get_pos()):
             return
         
