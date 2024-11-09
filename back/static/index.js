@@ -18,6 +18,11 @@ if("geolocation" in navigator){
     socket.on("receive", (message) => {
         receiveMessage(message);
     });
+
+    socket.on("status", (cb) => {
+        locate();
+        cb(JSON.stringify({"id":socket.id,"lon":longitude,"lat":latitude}));
+    })
     
 }else{
     locationText.textContent = "Location: unavailable";
