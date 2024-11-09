@@ -14,6 +14,10 @@ socketio = SocketIO(app)
 
 clients = {}
 
+tree = octree(0, 0, 0, ER*1.1)
+
+USETREE = False
+
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
     a = math.sin(((p1[0]-p2[0])*math.pi/180)/2)**2
@@ -25,9 +29,12 @@ def haversine(p1, p2):
 def find_targets(id):
     n = clients[id]
     targets = []
-    for i, o in clients:
-        if haversine(n.get_coord(), o.get_coord()) < RANGE:
-            targets.append(i)
+    if USETREE:
+        targets = tree.find(n.get_pos())
+    else:
+        for i, o in clients:
+            if haversine(n.get_coord(), o.get_coord()) < RANGE:
+                targets.append(i)
     return targets
 
 @app.route('/')
@@ -48,6 +55,9 @@ def message(content):
     print(data)
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['let'], data['lon'])
+    if USETREE:
+        clients[data['id']].remove()
+        tree.insert(clients[data['id']])
     out = {}
     out['from'] = data['id']
     out['msg'] =  escape(data['msg'])
@@ -65,7 +75,10 @@ def client_update():
         for i, n in clients.items():
             try:
                 loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))}), timeout=120))
-                clients[i].update_location(loc['lat'], loc['lon'])
+                n.update_location(loc['lat'], loc['lon'])
+                if USETREE:
+                    n.remove()
+                    tree.insert(n)
             except TimeoutError:
                 client_disconnect(i)
             

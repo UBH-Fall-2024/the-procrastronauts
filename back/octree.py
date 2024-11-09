@@ -11,6 +11,7 @@ def haversine(p1, p2):
     d = math.sin(((p1[0]-p2[0])*math.pi/180)/2)**2
     return 2*ER*math.asin(math.sqrt(a+(b*c*d)))
 
+
 def coord_to_real(coord):
     x = ER * math.cos(coord[1]) * math.cos(coord[0])
     y = ER * math.cos(coord[1]) * math.sin(coord[0])
@@ -30,6 +31,10 @@ class node:
         self.x = x
         self.y = y
         self.z = z
+        
+    def remove(self):
+        self.tree.n = None
+        self.tree = None
     
     def get_coord(self):
         return (self.lat, self.lon)
@@ -62,6 +67,41 @@ class octree:
          return (self.x - self.radius <= p[0] <= self.x + self.radius and
                  self.y - self.radius <= p[1] <= self.y + self.radius and
                  self.z - self.radius <= p[2] <= self.z + self.radius)
+    
+    def sphere_intersecting_cube(self, sphere_x, sphere_y, sphere_z, sphere_radius):
+        closest_x = max(self.x - self.radius, min(sphere_x, self.x + self.radius))
+        closest_y = max(self.y - self.radius, min(sphere_y, self.y + self.radius))
+        closest_z = max(self.z - self.radius, min(sphere_z, self.z + self.radius))
+        distance = math.sqrt((closest_x - sphere_x) ** 2 +
+                            (closest_y - sphere_y) ** 2 +
+                            (closest_z - sphere_z) ** 2)
+        return distance <= sphere_radius
+    
+    def point_in_sphere(self, sphere_x, sphere_y, sphere_z, sphere_radius):
+        x, y, z = self.n.get_pos()
+        distance = math.sqrt((x - sphere_x) ** 2 +
+                            (y - sphere_y) ** 2 +
+                            (z - sphere_z) ** 2)
+        return distance <= sphere_radius
+    
+    def find(self, pos):
+        if not self.split:
+            if self.n != None:
+                if self.point_in_sphere(pos[0], pos[1], pos[2], RANGE):
+                    return [self.n]
+                return []
+            return []
+        out = []
+        out.append(self.py_px_pz.find(pos))
+        out.append(self.py_px_mz.find(pos))
+        out.append(self.py_mx_pz.find(pos))
+        out.append(self.py_mx_mz.find(pos))
+
+        out.append(self.my_px_pz.find(pos))
+        out.append(self.my_px_mz.find(pos))
+        out.append(self.my_mx_pz.find(pos))
+        out.append(self.my_mx_mz.find(pos))
+        return out
 
     def insert(self, n):
         if not self.inside(n.get_pos()):
@@ -70,6 +110,7 @@ class octree:
         if not self.split:
             if self.n == None:
                 self.n = n
+                self.n.tree = self
                 return
             self.split()
             self.insert(self.n)
