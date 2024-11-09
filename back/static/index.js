@@ -52,12 +52,14 @@ function sendMessage(){
         "msg":cleanMessage(messageInput.value)
     };
 
-    socket.emit("send",message);
+    socket.emit("send",JSON.stringify(message));
     console.log("hi");
     messageInput.value = "";
 }
 
 function receiveMessage(message){
+
+    message = JSON.parse(message);
 
     messages.innerText = messages.innerText+"\n"+message["msg"];
 }
