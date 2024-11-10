@@ -57,6 +57,7 @@ function locationSuccess(position){
 
     if(prev_lat == undefined){
         socket.emit("join",JSON.stringify(me));
+        messageInput.removeAttribute("disabled");
     }else{
         socket.emit("status",JSON.stringify(me));
     }

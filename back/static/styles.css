@@ -12,6 +12,7 @@ p{
 }
 
 body{
+    height: 100vh;
     padding: 0px;
     margin: 0px;
     color: white;
@@ -20,6 +21,7 @@ body{
 }
 
 .chat-panel{
+    display: block;
     position: fixed;
     bottom: 0px;
     left: 0px;
@@ -93,9 +95,10 @@ body{
 }
 
 .messages{
+    display: block;
     position: fixed;
     top: 0px;
-    height: 80vh;
+    height: 100vh;
     width: 100vw;
     overflow-y: scroll;
     scrollbar-width: thin;
@@ -147,5 +150,5 @@ body{
 }
 
 .message-margin {
-    margin-bottom: var(--chat-message-spacing);
+    margin-bottom: calc(20vh + var(--chat-message-spacing));
 }
