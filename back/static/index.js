@@ -121,7 +121,7 @@ function createMessage(id, messageText){
     bubElement.appendChild(msgTextElement);
     bubElement.appendChild(msgTimeElement);
 
-    messages.appendChild(msgElement);
+    messages.insertBefore(messages.lastElementChild,msgElement);
 
     msgElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
 }
