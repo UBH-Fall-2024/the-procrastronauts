@@ -104,7 +104,7 @@ function createMessage(id, messageText){
 
     let bubElement = document.createElement("div");
     bubElement.classList.add("bubble");
-    bubElement.style.backgroundColor = "#"+(string_to_color(id))+"10";
+    bubElement.style.backgroundColor = "#"+(string_to_color(id,50))+"10";
 
     msgElement.appendChild(bubElement);
 
@@ -122,6 +122,7 @@ function createMessage(id, messageText){
 
     messages.appendChild(msgElement);
 
+    msgElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
 }
 
 // from https://github.com/brandoncorbin/string_to_color
