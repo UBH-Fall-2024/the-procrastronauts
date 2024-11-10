@@ -21,10 +21,11 @@ USETREE = False
 
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
-    a = math.sin(((p1[0]-p2[0])*math.pi/180)/2)**2
-    b = math.cos(p1[0]*math.pi/180)
-    c = math.cos(p2[0]*math.pi/180)
-    d = math.sin(((p1[1]-p2[1])*math.pi/180)/2)**2
+    lat1, lon1, lat2, lon2 = map(math.radians, [p1[0], p1[1], p2[0], p2[1]])
+    a = math.sin((lat2 - lat1)/2)**2
+    b = math.cos(lat1)
+    c = math.cos(lat2)
+    d = math.sin((lon2 - lon1)/2)**2
     return 2*ER*math.asin(math.sqrt(a+(b*c*d)))
 
 def find_targets(id):
