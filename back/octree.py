@@ -50,7 +50,7 @@ class octree:
         self.z = z
         self.radius = radius
 
-        self.split = False
+        self.has_split = False
         self.n = None
 
         self.py_px_mz = None
@@ -86,7 +86,7 @@ class octree:
         return distance <= sphere_radius
     
     def find(self, pos: tuple[float, float, float]):
-        if not self.split:
+        if not self.has_split:
             if self.n != None:
                 if self.point_in_sphere(pos[0], pos[1], pos[2], RANGE):
                     return [self.n]
@@ -108,7 +108,7 @@ class octree:
         if not self.inside(n.get_pos()):
             return
         
-        if not self.split:
+        if not self.has_split:
             if self.n == None:
                 self.n = n
                 self.n.tree = self
@@ -130,7 +130,7 @@ class octree:
         self.my_mx_mz.insert(n)
 
     def split(self):
-        self.split = True
+        self.has_split = True
         new_radius = self.radius / 2
         offsets = [-new_radius, new_radius]
 

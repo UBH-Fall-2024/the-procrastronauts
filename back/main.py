@@ -1,11 +1,11 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from markupsafe import escape
 import json
 import math
 from octree import node, octree
 
-RANGE = 12        #maximum distance for communication in meters
+RANGE = 24        #maximum distance for communication in meters
 ER = 6366707.0195 #Earth Radius in Meters
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ clients = {}
 
 tree = octree(0, 0, 0, ER*1.1)
 
-USETREE = False
+USETREE = True
 
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
@@ -48,9 +48,9 @@ def test_connect(auth):
     print("Client connected")
 
 @socketio.on('disconnect')
-def test_disconnect(stuff):
-    print('Client disconnected')
-    print(stuff)
+def test_disconnect():
+    clients[request.sid].remove()
+    del clients[request.sid]
 
 
 @socketio.on('join')
@@ -94,19 +94,19 @@ def update(content):
 #     clients[id].remove()
 #     del clients[id]
 
-def client_update():
-    while True:
-        for i, n in clients.items():
-            try:
-                loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))-1}), timeout=120, to=i))
-                n.update_location(loc['lat'], loc['lon'])
-                if USETREE:
-                    n.remove()
-                    tree.insert(n)
-            except TimeoutError:
-                client_disconnect(i)
+# def client_update():
+#     while True:
+#         for i, n in clients.items():
+#             try:
+#                 loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))-1}), timeout=120, to=i))
+#                 n.update_location(loc['lat'], loc['lon'])
+#                 if USETREE:
+#                     n.remove()
+#                     tree.insert(n)
+#             except TimeoutError:
+#                 client_disconnect(i)
             
-        socketio.sleep(3)
+#         socketio.sleep(3)
 
 if __name__ == '__main__':
     #socketio.start_background_task(client_update)
