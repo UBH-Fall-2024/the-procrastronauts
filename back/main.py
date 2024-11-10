@@ -80,7 +80,7 @@ def message(content):
     if out['msg'] == '':
         socketio.emit('bad', 'Cannot Send Empty Message', to=data['id'])
         return
-    if len['msg'] > 256:
+    if len(out['msg']) > 256:
         socketio.emit('bad', 'Cannot Send Message Longer Than 256 Chars', to=data['id'])
         return
     pl = json.dumps(out)
