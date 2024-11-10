@@ -6,6 +6,8 @@ let messageInput = document.getElementById("messageInput");
 let messageButton = document.getElementById("messageButton");
 let messages = document.getElementById("messages");
 
+let messagePresence = document.getElementById("messagePresence");
+
 locateButton.onclick = () => {locate();}
 messageButton.onclick = () => {sendMessage();}
 
@@ -19,8 +21,10 @@ if("geolocation" in navigator){
         receiveMessage(message);
     });
 
-    socket.on("status", (cb) => {
+    socket.on("status", (obj, cb) => {
         locate();
+        let status = JSON.parse(obj);
+        messagePresence.innerText = "Other users in proximity: "+(status[count]).toString();
         cb(JSON.stringify({"id":socket.id,"lon":longitude,"lat":latitude}));
     })
     
@@ -36,7 +40,7 @@ function locationSuccess(position){
     latitude = position.coords.latitude;
     longitude = position.coords.longitude;
     
-    locationText.textContent = "Location: "+latitude.toString()+", "+longitude.toString();
+    locationText.textContent = latitude.toString()+"\n"+longitude.toString();
 }
 
 function locationError(){
