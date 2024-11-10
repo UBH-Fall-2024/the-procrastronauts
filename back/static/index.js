@@ -15,6 +15,8 @@ let longitude;
 let latitude;
 
 if("geolocation" in navigator){
+    socket.connect();
+
     locate();
 
     socket.on("receive", (message) => {
