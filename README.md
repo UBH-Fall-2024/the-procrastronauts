@@ -1,1 +1,14 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/_U2QbDVP)
+# IRL Proximity Chat
+
+The app is completely anonymous and uses your location data to send and receive messages to and from those in your immediate proximity. Absolutely nothing is stored about any users, and there is no identifying information exchanged at any point. This makes it perfect for asking questions or making statements in environments where there may be barriers to communicating traditionally.
+
+# Setup
+
+This does require location access to be enable and runs best on a mobile device (but desktop works as well).
+
+-   Clone the repo onto your local machine
+-   Make sure you have the dependencies installed
+-   Run `python3 back/main.py` to run the web server
+-   The console will write the address at which it is being hosted
+-   Go to that address in a web browser
+-   Enjoy!
