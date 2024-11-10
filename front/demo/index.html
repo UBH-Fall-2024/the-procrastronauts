@@ -7,11 +7,12 @@
 	<title>Funny Chat</title>
 	<link rel="stylesheet" href="styles.css" />
 	<link rel="stylesheet" href="/static/styles.css" />
+	<link rel="shortcut icon" href="/static/favicon.png" type="image/png">
 </head>
 
 <body>
 	<div id="messages" class="messages">
-		<p class="message-status"><i>Start of conversation</i></p>
+		<p class="message-status"><i id="messageStart">Waiting...</i></p>
 
 
 		<div class="message">
@@ -90,7 +91,7 @@
 			</div>
 
 			<div class="chat-item-col">
-				<p id="messagePresence">There are others</p>
+				<p id="messagePresence">Waiting for server...</p>
 			</div>
 
 			<div class="chat-item-col col-end">

@@ -20,6 +20,7 @@ body{
     background-color: rgb(24, 40, 40);
     /* height: 100vh; */
     overflow-y: scroll;
+    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color:rgba(255, 255, 255, 0.05) transparent;
 }

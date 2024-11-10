@@ -6,9 +6,16 @@ let messageInput = document.getElementById("messageInput");
 let messageButton = document.getElementById("messageButton");
 let messages = document.getElementById("messages");
 
+let messageStart = document.getElementById("messageStart");
 let messagePresence = document.getElementById("messagePresence");
 
 locateButton.onclick = () => {}
+
+messageInput.onkeydown = (event) => {
+  if (event.key === "Enter") {
+    sendMessage();
+  }
+}
 messageButton.onclick = () => {sendMessage();}
 
 let longitude;
@@ -56,6 +63,10 @@ function locationSuccess(position){
     };
 
     if(prev_lat == undefined){
+
+        let date = new Date();
+        messageStart.innerText = "Joined conversation at "+date.toLocaleTimeString();
+
         socket.emit("join",JSON.stringify(me));
         messageInput.removeAttribute("disabled");
     }else{
@@ -105,7 +116,7 @@ function createMessage(id, messageText){
 
     let bubElement = document.createElement("div");
     bubElement.classList.add("bubble");
-    bubElement.style.backgroundColor = "#"+(string_to_color(id,50))+"10";
+    bubElement.style.backgroundColor = "#"+(string_to_color(id,80))+"10";
 
     msgElement.appendChild(bubElement);
 
@@ -124,7 +135,7 @@ function createMessage(id, messageText){
 
     messages.insertBefore(msgElement,messages.lastElementChild);
 
-    msgElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+    msgElement.scrollIntoView({ behavior: "smooth"});
 }
 
 // from https://github.com/brandoncorbin/string_to_color
