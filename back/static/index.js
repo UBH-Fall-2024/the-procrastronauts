@@ -116,7 +116,7 @@ function createMessage(id, messageText){
 
     let bubElement = document.createElement("div");
     bubElement.classList.add("bubble");
-    bubElement.style.backgroundColor = "#"+(string_to_color(id,80))+"10";
+    bubElement.style.backgroundColor = "#"+(string_to_color(id,80))+"30";
 
     msgElement.appendChild(bubElement);
 
