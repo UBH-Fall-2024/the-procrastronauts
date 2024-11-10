@@ -52,8 +52,9 @@ def test_connect(auth):
 
 @socketio.on('disconnect')
 def test_disconnect():
-    clients[request.sid].remove()
-    del clients[request.sid]
+    if request.sid in clients:
+        clients[request.sid].remove()
+        del clients[request.sid]
 
 
 @socketio.on('join')
@@ -76,6 +77,12 @@ def message(content):
     out = {}
     out['from'] = data['id']
     out['msg'] =  escape(data['msg'])
+    if out['msg'] == '':
+        socketio.emit('bad', 'Cannot Send Empty Message', to=data['id'])
+        return
+    if len['msg'] > 256:
+        socketio.emit('bad', 'Cannot Send Message Longer Than 256 Chars', to=data['id'])
+        return
     pl = json.dumps(out)
     targets = find_targets(data['id'])
     for t in targets:
