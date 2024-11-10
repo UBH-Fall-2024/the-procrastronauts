@@ -3,9 +3,10 @@ from flask_socketio import SocketIO
 from markupsafe import escape
 import json
 import math
-from octree import node, octree, quadtree
+from octree import node, octree, quadtree, balltree
 
-RANGE = 24        #maximum distance for communication in meters
+UPDATE_RANGE = 3
+RANGE = 40        #maximum distance for communication in meters
 ER = 6366707.0195 #Earth Radius in Meters
 
 app = Flask(__name__)
@@ -15,9 +16,9 @@ socketio = SocketIO(app)
 clients = {}
 
 # tree = octree(0, 0, 0, ER*1.1)
-tree = quadtree(0,0, 1)
+tree = balltree()
 
-USETREE = False
+USETREE = True
 
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
@@ -32,12 +33,19 @@ def find_targets(id):
     n = clients[id]
     targets = []
     if USETREE:
-        targets = tree.find(n.get_pos())
-        print(f'found {len(targets)} nearby {n.get_coord()} {n.id}')
+        o = tree.find(n, RANGE)
+        s = {}
+        for t in o:
+            if t.id is not None:
+                s[t.id] = t
+                # print(f'found {t.id}')
+        for i, p in s.items():
+            targets.append(i)
+        # print(f'found {len(targets)} nearby {n.get_coord()} {n.id}')
     else:
         for i, o in clients.items():
             dist = haversine(n.get_coord(), o.get_coord())
-            print (f"people are {dist}m apart")
+            # print (f"people are {dist}m apart")
             if  dist < RANGE:
                 targets.append(i)
     return targets
@@ -63,7 +71,7 @@ def join(content):
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
     if USETREE:
-        clients[data['id']].remove()
+        # clients[data['id']].remove()
         tree.insert(clients[data['id']])
 
 @socketio.on('send')
@@ -71,12 +79,19 @@ def message(content):
     data = json.loads(content)
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
-    if USETREE:
-        clients[data['id']].remove()
-        tree.insert(clients[data['id']])
+        if USETREE:
+            tree.insert(clients[data['id']])
+    else:
+        if haversine((clients[data['id']].lat, clients[data['id']].lon), 
+                     (data['lat'], data['lon'])) > UPDATE_RANGE:
+            clients[data['id']].update_location(data['lat'], data['lon'])
+            if USETREE:
+                #tree.build_tree(tree.points)
+                clients[data['id']].remove()
+                tree.insert(clients[data['id']])
     out = {}
     out['from'] = data['id']
-    out['msg'] =  escape(data['msg'])
+    out['msg'] =  data['msg']
     if out['msg'] == '':
         socketio.emit('bad', 'Cannot Send Empty Message', to=data['id'])
         return
@@ -93,10 +108,15 @@ def update(content):
     data = json.loads(content)
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
-    clients[data['id']].update_location(data['lat'], data['lon'])
-    if USETREE:
-        clients[data['id']].remove()
-        tree.insert(clients[data['id']])
+    else:
+        if haversine((clients[data['id']].lat, clients[data['id']].lon), 
+                     (data['lat'], data['lon'])) > UPDATE_RANGE:
+            clients[data['id']].update_location(data['lat'], data['lon'])
+            if USETREE:
+                #tree.build_tree(tree.points)
+                # print("updating value")
+                clients[data['id']].remove()
+                tree.insert(clients[data['id']])
     socketio.emit('nearby', json.dumps({'count': len(find_targets(data['id']))-1}), to=data['id'])
 
 if __name__ == '__main__':
