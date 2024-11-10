@@ -8,27 +8,32 @@ let messages = document.getElementById("messages");
 
 let messagePresence = document.getElementById("messagePresence");
 
-locateButton.onclick = () => {locate();}
+locateButton.onclick = () => {}
 messageButton.onclick = () => {sendMessage();}
 
 let longitude;
 let latitude;
 
+let options = {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0,
+  };
+
 function connect(){
     if("geolocation" in navigator){
 
-        locate();
+        navigator.geolocation.watchPosition(locationSuccess,locationError,options);
     
         socket.on("receive", (message) => {
             receiveMessage(message);
         });
+
+        socket.on("nearby", (obj) => {
+            count_obj = JSON.parse(obj);
+            messagePresence.innerText = "Other users in proximity: "+(count_obj["count"]).toString();
+        });
     
-        socket.on("status", (obj, cb) => {
-            locate();
-            let status = JSON.parse(obj);
-            messagePresence.innerText = "Other users in proximity: "+(status["count"]).toString();
-            cb(JSON.stringify({"id":socket.id,"lon":longitude,"lat":latitude}));
-        })
         
     }else{
         locationText.textContent = "Location: unavailable";
@@ -37,30 +42,25 @@ function connect(){
 
 socket.on("connect", () => {connect();})
 
-function locate(){
-    navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
-}
-
 function locationSuccess(position){
 
-    if(latitude == undefined && longitude == undefined){
-
-        latitude = position.coords.latitude;
-        longitude = position.coords.longitude;
-
-        let me = {
-            "id": socket.id,
-            "lon": longitude,
-            "lat": latitude,
-        };
-
-        console.log(me);
-    
-        socket.emit("join",JSON.stringify(me));
-    }
+    let prev_lat = latitude;
 
     latitude = position.coords.latitude;
     longitude = position.coords.longitude;
+
+    let me = {
+        "id": socket.id,
+        "lon": longitude,
+        "lat": latitude,
+    };
+
+    if(prev_lat == undefined){
+        socket.emit("join",JSON.stringify(me));
+    }else{
+        socket.emit("status",JSON.stringify(me));
+    }
+
     
     locationText.textContent = latitude.toString()+"\n"+longitude.toString();
 }
