@@ -14,25 +14,28 @@ messageButton.onclick = () => {sendMessage();}
 let longitude;
 let latitude;
 
-if("geolocation" in navigator){
-    socket.connect();
+function connect(){
+    if("geolocation" in navigator){
 
-    locate();
-
-    socket.on("receive", (message) => {
-        receiveMessage(message);
-    });
-
-    socket.on("status", (obj, cb) => {
         locate();
-        let status = JSON.parse(obj);
-        messagePresence.innerText = "Other users in proximity: "+(status["count"]).toString();
-        cb(JSON.stringify({"id":socket.id,"lon":longitude,"lat":latitude}));
-    })
     
-}else{
-    locationText.textContent = "Location: unavailable";
+        socket.on("receive", (message) => {
+            receiveMessage(message);
+        });
+    
+        socket.on("status", (obj, cb) => {
+            locate();
+            let status = JSON.parse(obj);
+            messagePresence.innerText = "Other users in proximity: "+(status["count"]).toString();
+            cb(JSON.stringify({"id":socket.id,"lon":longitude,"lat":latitude}));
+        })
+        
+    }else{
+        locationText.textContent = "Location: unavailable";
+    }
 }
+
+socket.on("connect", () => {connect();})
 
 function locate(){
     navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
