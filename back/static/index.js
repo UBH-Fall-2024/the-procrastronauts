@@ -24,7 +24,7 @@ if("geolocation" in navigator){
     socket.on("status", (obj, cb) => {
         locate();
         let status = JSON.parse(obj);
-        messagePresence.innerText = "Other users in proximity: "+(status[count]).toString();
+        messagePresence.innerText = "Other users in proximity: "+(status["count"]).toString();
         cb(JSON.stringify({"id":socket.id,"lon":longitude,"lat":latitude}));
     })
     
