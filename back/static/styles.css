@@ -69,6 +69,7 @@ body{
     flex-direction: row-reverse;
     width: 100%;
     align-items: start;
+    text-align: right;
 }
 
 .chat-panel input{
@@ -86,7 +87,7 @@ body{
     color: white;
 }
 
-.chat-panel button{
+.chat-panel .button{
     width: var(--btn-size);
     height: var(--btn-size);
     border-radius: var(--btn-size);
@@ -103,6 +104,14 @@ body{
     border-image: none;
     cursor: pointer;
 }
+
+.chat-panel img{
+    margin: 4px;
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+}
+
+
 
 .messages{
     display: block;
