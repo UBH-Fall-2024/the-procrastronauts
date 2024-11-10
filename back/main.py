@@ -77,6 +77,8 @@ def join(content):
 @socketio.on('send')
 def message(content):
     data = json.loads(content)
+    if 'id' not in data:
+        data['id'] = request.sid
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
         if USETREE:
@@ -106,6 +108,8 @@ def message(content):
 @socketio.on('status')
 def update(content):
     data = json.loads(content)
+    if 'id' not in data:
+        data['id'] = request.sid
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
     else:
