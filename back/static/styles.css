@@ -45,6 +45,20 @@ body{
     align-items: center;
 }
 
+.col-start{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: start;
+}
+
+.col-end{
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    align-items: start;
+}
+
 .chat-panel input{
     width: 66vw;
     height: var(--btn-size);
