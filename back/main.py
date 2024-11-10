@@ -3,7 +3,7 @@ from flask_socketio import SocketIO
 from markupsafe import escape
 import json
 import math
-from octree import node, octree
+from octree import node, octree, quadtree
 
 RANGE = 24        #maximum distance for communication in meters
 ER = 6366707.0195 #Earth Radius in Meters
@@ -14,9 +14,10 @@ socketio = SocketIO(app)
 
 clients = {}
 
-tree = octree(0, 0, 0, ER*1.1)
+# tree = octree(0, 0, 0, ER*1.1)
+tree = quadtree(0,0, 1)
 
-USETREE = True
+USETREE = False
 
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
@@ -31,6 +32,7 @@ def find_targets(id):
     targets = []
     if USETREE:
         targets = tree.find(n.get_pos())
+        print(f'found {len(targets)} nearby {n.get_coord()} {n.id}')
     else:
         for i, o in clients.items():
             dist = haversine(n.get_coord(), o.get_coord())
@@ -89,25 +91,5 @@ def update(content):
         tree.insert(clients[data['id']])
     socketio.emit('nearby', json.dumps({'count': len(find_targets(data['id']))-1}), to=data['id'])
 
-# def client_disconnect(id):
-#     socketio.emit('disconnect', to=id)
-#     clients[id].remove()
-#     del clients[id]
-
-# def client_update():
-#     while True:
-#         for i, n in clients.items():
-#             try:
-#                 loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))-1}), timeout=120, to=i))
-#                 n.update_location(loc['lat'], loc['lon'])
-#                 if USETREE:
-#                     n.remove()
-#                     tree.insert(n)
-#             except TimeoutError:
-#                 client_disconnect(i)
-            
-#         socketio.sleep(3)
-
 if __name__ == '__main__':
-    #socketio.start_background_task(client_update)
     socketio.run(app, host='0.0.0.0', ssl_context='adhoc')
