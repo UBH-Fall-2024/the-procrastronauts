@@ -37,6 +37,21 @@ function locate(){
 }
 
 function locationSuccess(position){
+
+    if(latitude == undefined && longitude == undefined){
+
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+
+        let me = {
+            "id":socket.id,
+            "lon": longitude,
+            "lat": latitude,
+        };
+    
+        socket.emit("join",JSON.stringify(me));
+    }
+
     latitude = position.coords.latitude;
     longitude = position.coords.longitude;
     
