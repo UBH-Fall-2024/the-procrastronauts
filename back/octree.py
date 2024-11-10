@@ -33,7 +33,8 @@ class node:
         self.z = z
 
     def remove(self):
-        self.tree.n = None
+        if self.tree != None:
+            self.tree.n = None
         self.tree = None
     
     def get_coord(self) -> tuple[float, float]:

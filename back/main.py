@@ -16,7 +16,7 @@ clients = {}
 
 tree = octree(0, 0, 0, ER*1.1)
 
-USETREE = True
+USETREE = False
 
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
@@ -27,7 +27,6 @@ def haversine(p1, p2):
     return 2*ER*math.asin(math.sqrt(a+(b*c*d)))
 
 def find_targets(id):
-    print(clients)
     n = clients[id]
     targets = []
     if USETREE:
@@ -49,13 +48,14 @@ def test_connect(auth):
     print("Client connected")
 
 @socketio.on('disconnect')
-def test_disconnect():
+def test_disconnect(stuff):
     print('Client disconnected')
+    print(stuff)
+
 
 @socketio.on('join')
 def join(content):
     data = json.loads(content)
-    print(data)
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
     if USETREE:
@@ -65,7 +65,6 @@ def join(content):
 @socketio.on('send')
 def message(content):
     data = json.loads(content)
-    print(data)
     if data['id'] not in clients:
         clients[data['id']] = node(data['id'], data['lat'], data['lon'])
     if USETREE:
@@ -79,10 +78,21 @@ def message(content):
     for t in targets:
         socketio.emit('receive', pl, to=t)
 
-def client_disconnect(id):
-    socketio.emit('disconnect', to=id)
-    clients[id].remove()
-    del clients[id]
+@socketio.on('status')
+def update(content):
+    data = json.loads(content)
+    if data['id'] not in clients:
+        clients[data['id']] = node(data['id'], data['lat'], data['lon'])
+    clients[data['id']].update_location(data['lat'], data['lon'])
+    if USETREE:
+        clients[data['id']].remove()
+        tree.insert(clients[data['id']])
+    socketio.emit('nearby', json.dumps({'count': len(find_targets(data['id']))-1}), to=data['id'])
+
+# def client_disconnect(id):
+#     socketio.emit('disconnect', to=id)
+#     clients[id].remove()
+#     del clients[id]
 
 def client_update():
     while True:
@@ -99,5 +109,5 @@ def client_update():
         socketio.sleep(3)
 
 if __name__ == '__main__':
-    socketio.start_background_task(client_update)
+    #socketio.start_background_task(client_update)
     socketio.run(app, host='0.0.0.0', ssl_context='adhoc')
