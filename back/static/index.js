@@ -44,10 +44,12 @@ function locationSuccess(position){
         longitude = position.coords.longitude;
 
         let me = {
-            "id":socket.id,
+            "id": socket.id,
             "lon": longitude,
             "lat": latitude,
         };
+
+        console.log(me);
     
         socket.emit("join",JSON.stringify(me));
     }
