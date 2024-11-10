@@ -16,7 +16,7 @@ clients = {}
 
 tree = octree(0, 0, 0, ER*1.1)
 
-USETREE = False
+USETREE = True
 
 # https://en.wikipedia.org/wiki/Haversine_formula
 def haversine(p1, p2):
@@ -27,13 +27,16 @@ def haversine(p1, p2):
     return 2*ER*math.asin(math.sqrt(a+(b*c*d)))
 
 def find_targets(id):
+    print(clients)
     n = clients[id]
     targets = []
     if USETREE:
         targets = tree.find(n.get_pos())
     else:
-        for i, o in clients:
-            if haversine(n.get_coord(), o.get_coord()) < RANGE:
+        for i, o in clients.items():
+            dist = haversine(n.get_coord(), o.get_coord())
+            print (f"people are {dist}m apart")
+            if  dist < RANGE:
                 targets.append(i)
     return targets
 
@@ -41,20 +44,30 @@ def find_targets(id):
 def home():
     return render_template('index.html')
 
-# @socketio.on('connect')
-# def test_connect(auth):
-#     print("Client connected")
+@socketio.on('connect')
+def test_connect(auth):
+    print("Client connected")
 
-# @socketio.on('disconnect')
-# def test_disconnect():
-#     print('Client disconnected')
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
+
+@socketio.on('join')
+def join(content):
+    data = json.loads(content)
+    print(data)
+    if data['id'] not in clients:
+        clients[data['id']] = node(data['id'], data['lat'], data['lon'])
+    if USETREE:
+        clients[data['id']].remove()
+        tree.insert(clients[data['id']])
 
 @socketio.on('send')
 def message(content):
     data = json.loads(content)
     print(data)
     if data['id'] not in clients:
-        clients[data['id']] = node(data['id'], data['let'], data['lon'])
+        clients[data['id']] = node(data['id'], data['lat'], data['lon'])
     if USETREE:
         clients[data['id']].remove()
         tree.insert(clients[data['id']])
@@ -68,13 +81,14 @@ def message(content):
 
 def client_disconnect(id):
     socketio.emit('disconnect', to=id)
+    clients[id].remove()
     del clients[id]
 
 def client_update():
     while True:
         for i, n in clients.items():
             try:
-                loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))}), timeout=120))
+                loc = json.loads(socketio.call('status', json.dumps({'count': len(find_targets(i))-1}), timeout=120, to=i))
                 n.update_location(loc['lat'], loc['lon'])
                 if USETREE:
                     n.remove()
@@ -86,4 +100,4 @@ def client_update():
 
 if __name__ == '__main__':
     socketio.start_background_task(client_update)
-    socketio.run(app)
+    socketio.run(app, host='0.0.0.0', ssl_context='adhoc')
